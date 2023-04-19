@@ -15,7 +15,7 @@ model_id = 'gpt-3.5-turbo'
 url = f"https://home.sensibo.com/api/v2/users/me/pods?fields=*&apiKey={api_key}"
 
 global_json = {}
-is_debug_mode = False
+is_debug_mode = True
 
 test_gpt_op = {
     "Temperature": {
@@ -78,6 +78,25 @@ def lowest_highest_ai(temp, humidity, feels_like):
     return completion.choices[0].message.content
 
 
+def calculate_best_temperature(high_temp, low_temp):
+    global_json = ac_details()
+    feels_like_temp = global_json["sensibo_data"][0]["feelsLike"]
+    target_temp = (high_temp + low_temp) / 2
+    temp_diff = target_temp - feels_like_temp
+
+    if temp_diff > 0:
+        result_temp = target_temp - temp_diff
+    else:
+        result_temp = target_temp + abs(temp_diff)
+
+    if result_temp > high_temp:
+        return high_temp
+    elif result_temp < low_temp:
+        return low_temp
+    else:
+        return round(result_temp)
+
+
 def set_ac_temp(range, device_id):
     is_ac_on = get_ac_state()
     if is_ac_on:
@@ -90,7 +109,9 @@ def set_ac_temp(range, device_id):
             low = json_obj['Temperature']['l']
             high = json_obj['Temperature']['h']
             fanspeed = json_obj['Temperature']['fanspeed']
-        set_ac_param("targetTemperature", low, device_id)
+        best_target_temp = calculate_best_temperature(
+            high_temp=high, low_temp=low)
+        set_ac_param("targetTemperature", best_target_temp, device_id)
         set_ac_param("fanLevel", fanspeed, device_id)
         set_ac_param("mode", "cool", device_id)
     else:
