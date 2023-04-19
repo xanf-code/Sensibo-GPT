@@ -1,9 +1,13 @@
 import requests
 import json
 import openai
+import os
+from dotenv import load_dotenv
 
-api_key = "7cSGSQ2ryeXlaYOtwZiQy0NHVtL6BN"
-open_api_key = "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"
+load_dotenv()
+
+api_key = os.getenv("AC_API_KEY")
+open_api_key = os.getenv("OPEN_AI_API_KEY")
 openai.api_key = open_api_key
 
 model_id = 'gpt-3.5-turbo'
