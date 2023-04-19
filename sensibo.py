@@ -19,8 +19,8 @@ is_debug_mode = True
 
 test_gpt_op = {
     "Temperature": {
-        "l": 23,
-        "h": 27,
+        "l": 20,
+        "h": 26,
         "fanspeed": "medium"
     }
 }
@@ -41,6 +41,10 @@ def ac_details():
                 "feelsLike": result["measurements"]["feelsLike"],
                 "tvoc": result["measurements"]["tvoc"],
                 "Co2": result["measurements"]["co2"],
+                "anti_mold_enabled":result["antiMoldConfig"]["enabled"],
+                "anti_mold_time":result["antiMoldConfig"]["fan_time"],
+                "anti_mold_running":result["antiMoldConfig"]["anti_mold_running"],
+                "acUsage": result["acUsage"]
             } for result in data["result"]]
         global_json = {"sensibo_data": room_data}
         return global_json
@@ -74,7 +78,7 @@ def toggle_ac():
 
 def lowest_highest_ai(temp, humidity, feels_like):
     completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[
-                                              {"role": "assistant", "content": f"What is the best AC configuration for a room with a temperature of {temp}°C, humidity of {humidity}%, feels-like temperature of {feels_like}°C, assuming there is only one person present in the room? Also, do not give me a sentence or such, just give me a json format so that i can use it in my web project. And i would want only one object in the JSON which will be called Temperature and three keys, namely l, h and fanspeed. The fanspeed can be low,medium,high or strong. Please note i want 0 words or sentences in the result, i would only expect a json object. Also only return the integer do not return anything like °C along with it."}])
+                                              {"role": "assistant", "content": f"What is the best AC configuration for a room with a temperature of {temp}°C, humidity of {humidity}%, feels-like temperature of {feels_like}°C, assuming there is only one person present in the room? Also, do not give me a sentence or such, just give me a json format so that i can use it in my web project. And i would want only one object in the JSON which will be called Temperature and three keys, namely l, h and fanspeed. The fanspeed can be quiet,low,medium_low,medium,high or strong. Please note i want 0 words or sentences in the result, i would only expect a json object. Also only return the integer do not return anything like °C along with it."}])
     return completion.choices[0].message.content
 
 
