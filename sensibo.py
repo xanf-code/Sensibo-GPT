@@ -3,11 +3,15 @@ import json
 import openai
 import os
 from dotenv import load_dotenv
+from open_weather import get_hourly_weather_data
+import datetime
+import math
 
 load_dotenv()
 
 api_key = os.getenv("AC_API_KEY")
 open_api_key = os.getenv("OPEN_AI_API_KEY")
+weather_api = os.getenv("WEATHER_API")
 openai.api_key = open_api_key
 
 model_id = 'gpt-3.5-turbo'
@@ -15,7 +19,7 @@ model_id = 'gpt-3.5-turbo'
 url = f"https://home.sensibo.com/api/v2/users/me/pods?fields=*&apiKey={api_key}"
 
 global_json = {}
-is_debug_mode = True
+is_debug_mode = False
 
 test_gpt_op = {
     "Temperature": {
@@ -84,15 +88,56 @@ def lowest_highest_ai(temp, humidity, feels_like):
 
 def calculate_best_temperature(high_temp, low_temp):
     global_json = ac_details()
-    feels_like_temp = global_json["sensibo_data"][0]["feelsLike"]
-    target_temp = (high_temp + low_temp) / 2
-    temp_diff = target_temp - feels_like_temp
+    current_temp = global_json["sensibo_data"][0]["temperature"]
+    humidity = global_json["sensibo_data"][0]["humidity"]
+    # air_quality = global_json["air_quality_data"][0]["aqi"]
+    current_time = datetime.datetime.now().time()
 
+    dew_point = current_temp - ((100 - humidity)/5)
+
+    apparent_temp = current_temp + 0.5 * \
+        (6.105*math.exp(17.27*dew_point/(dew_point+237.7))*(humidity/100)-10)
+
+    if apparent_temp < 0:
+        desired_temp_range = (23, 25)
+    elif apparent_temp < 10:
+        desired_temp_range = (24, 26)
+    elif apparent_temp < 20:
+        desired_temp_range = (25, 27)
+    elif apparent_temp < 30:
+        desired_temp_range = (26, 28)
+    elif apparent_temp < 40:
+        desired_temp_range = (27, 29)
+    else:
+        desired_temp_range = (28, 30)
+
+    if current_time >= datetime.time(22, 0) or current_time < datetime.time(6, 0):
+        desired_temp_range = (
+            desired_temp_range[0] - 1, desired_temp_range[1] - 1)
+
+    # # Step 6: Adjust the desired temperature range based on the air quality
+    # if air_quality > 150:
+    #     desired_temp_range = (
+    #         desired_temp_range[0] + 1, desired_temp_range[1] + 1)
+
+    forecast_temp = get_hourly_weather_data(weather_api)
+    if forecast_temp > current_temp + 5:
+        desired_temp_range = (
+            desired_temp_range[0] + 1, desired_temp_range[1] + 1)
+    elif forecast_temp < current_temp - 5:
+        desired_temp_range = (
+            desired_temp_range[0] - 1, desired_temp_range[1] - 1)
+
+    if high_temp > desired_temp_range[1]:
+        high_temp = desired_temp_range[1]
+    if low_temp < desired_temp_range[0]:
+        low_temp = desired_temp_range[0]
+    target_temp = (high_temp + low_temp) / 2
+    temp_diff = target_temp - current_temp
     if temp_diff > 0:
         result_temp = target_temp - temp_diff
     else:
         result_temp = target_temp + abs(temp_diff)
-
     if result_temp > high_temp:
         return high_temp
     elif result_temp < low_temp:
@@ -115,6 +160,7 @@ def set_ac_temp(range, device_id):
             fanspeed = json_obj['Temperature']['fanspeed']
         best_target_temp = calculate_best_temperature(
             high_temp=high, low_temp=low)
+        print(best_target_temp)
         set_ac_param("targetTemperature", best_target_temp, device_id)
         set_ac_param("fanLevel", fanspeed, device_id)
         set_ac_param("mode", "cool", device_id)
@@ -160,6 +206,5 @@ def main():
         set_ac_temp(range, global_json["sensibo_data"][0]["device_uid"])
     else:
         print("AC in off state, not getting data. ")
-
 
 # main()
