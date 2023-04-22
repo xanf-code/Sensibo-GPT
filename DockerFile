@@ -1,20 +1,18 @@
-# # Dockerfile
-# FROM python:3.7-stretch
-# RUN apt-get update -y
-# RUN apt-get install -y python-pip python-dev build-essential
-# COPY . /app
-# WORKDIR /app
-# RUN pip install -r requirements.txt
-# ENTRYPOINT ["python"]
-# CMD ["app.py"]
+FROM python:3.9-slim
 
-FROM python:3.8-slim-buster
-
+# Set the working directory
 WORKDIR /app
 
-COPY . /app
+# Copy the requirements file
+COPY requirements.txt .
 
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+# Install the required packages within a virtual environment
+RUN python -m venv env && \
+    . env/bin/activate && \
+    pip install -r requirements.txt
 
-CMD [ "python", "app.py" ]
+# Copy the rest of the application code
+COPY . .
+
+# Set the entrypoint
+ENTRYPOINT ["python", "app.py"]
