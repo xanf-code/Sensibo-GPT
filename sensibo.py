@@ -89,7 +89,7 @@ def toggle_ac():
 
 def lowest_highest_ai(temp, humidity, feels_like):
     completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[
-                                              {"role": "assistant", "content": f"What is the best AC configuration for a room with a temperature of {temp}°C, humidity of {humidity}%, feels-like temperature of {feels_like}°C, assuming there is only one person present in the room? Also, do not give me a sentence or such, just give me a json format so that i can use it in my web project. And i would want only one object in the JSON which will be called Temperature and three keys, namely l, h and fanspeed. The fanspeed can be quiet,low,medium_low,medium,high or strong. Please note i want 0 words or sentences in the result, i would only expect a json object. Also only return the integer do not return anything like °C along with it."}])
+                                              {"role": "assistant", "content": f"What is the best AC configuration for a room with a temperature of {temp}°C, humidity of {humidity}%, feels-like temperature of {feels_like}°C, assuming there is only one person present in the room? Also, do not give me a sentence or such, just give me a json format so that i can use it in my web project. And i would want only one object in the JSON which will be called Temperature and four keys, namely l, h, fanspeed, mode. The l is what you feel is the desired lowest temperature and h is what you feel is the desired highest temperature. The fanspeed can be quiet,low,medium_low,medium,high or strong. The mode can be cool, heat, fan, dry, auto. Please note i want 0 words or sentences in the result, i would only expect a json object. Also only return the integer do not return anything like °C along with it."}])
     return completion.choices[0].message.content
 
 
@@ -166,11 +166,12 @@ def set_ac_temp(range, device_id):
             low = json_obj['Temperature']['l']
             high = json_obj['Temperature']['h']
             fanspeed = json_obj['Temperature']['fanspeed']
+            mode = json_obj['Temperature']['mode']
         best_target_temp = calculate_best_temperature(
             high_temp=high, low_temp=low)
         set_ac_param("targetTemperature", best_target_temp, device_id)
         set_ac_param("fanLevel", fanspeed, device_id)
-        set_ac_param("mode", "cool", device_id)
+        set_ac_param("mode", mode, device_id)
     else:
         print("Cannot set params, AC is off.")
 
