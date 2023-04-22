@@ -16,10 +16,17 @@ def ac_toggle():
 
 @app.route('/dynamic_ac', methods=['POST'])
 def dynamic_params():
-    dynamic_ac_ai()
-    response = jsonify({'message': '[INFO] Dynamic AC run.'})
-    response.status_code = 200
-    return response
+    global_json = ac_details()
+    ac_status = global_json["sensibo_data"][0]["ac_state"]
+    if ac_status:
+        dynamic_ac_ai()
+        response = jsonify({'message': '[INFO] Dynamic AC run.'})
+        response.status_code = 200
+        return response
+    else:
+        response = jsonify({'message': '[INFO] Cannot update, AC off.'})
+        response.status_code = 200
+        return response
 
 
 if __name__ == '__main__':
