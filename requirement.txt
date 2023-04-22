@@ -1,2 +1,4 @@
-openai==0.27.4
-requests==2.28.0
+flask
+openai
+requests
+python-dotenv
