@@ -6,7 +6,8 @@ from dotenv import load_dotenv
 from open_weather import get_hourly_weather_data
 import datetime
 import math
-from settings import MODE
+from settings import MODE, is_debug_mode
+from air_quality import calculate_air_quality
 
 load_dotenv()
 
@@ -18,7 +19,7 @@ elif MODE == "prod":
     api_key = os.environ.get('SENSIBO_API_KEY')
     open_api_key = os.environ.get('OPEN_API_KEY')
     weather_api = os.environ.get('WEATHER_API_KEY')
-    
+
 openai.api_key = open_api_key
 
 model_id = 'gpt-3.5-turbo'
@@ -26,7 +27,6 @@ model_id = 'gpt-3.5-turbo'
 url = f"https://home.sensibo.com/api/v2/users/me/pods?fields=*&apiKey={api_key}"
 
 global_json = {}
-is_debug_mode = False
 
 test_gpt_op = {
     "Temperature": {
@@ -97,7 +97,9 @@ def calculate_best_temperature(high_temp, low_temp):
     global_json = ac_details()
     current_temp = global_json["sensibo_data"][0]["temperature"]
     humidity = global_json["sensibo_data"][0]["humidity"]
-    # air_quality = global_json["air_quality_data"][0]["aqi"]
+    tvoc = global_json["sensibo_data"][0]["tvoc"]
+    co2 = global_json["sensibo_data"][0]["Co2"]
+    air_quality = calculate_air_quality(tvoc, co2)
     current_time = datetime.datetime.now().time()
 
     dew_point = current_temp - ((100 - humidity)/5)
@@ -122,10 +124,9 @@ def calculate_best_temperature(high_temp, low_temp):
         desired_temp_range = (
             desired_temp_range[0] - 1, desired_temp_range[1] - 1)
 
-    # # Step 6: Adjust the desired temperature range based on the air quality
-    # if air_quality > 150:
-    #     desired_temp_range = (
-    #         desired_temp_range[0] + 1, desired_temp_range[1] + 1)
+    if air_quality > 150:
+        desired_temp_range = (
+            desired_temp_range[0] + 1, desired_temp_range[1] + 1)
 
     forecast_temp = get_hourly_weather_data(weather_api)
     if forecast_temp > current_temp + 5:
@@ -167,7 +168,6 @@ def set_ac_temp(range, device_id):
             fanspeed = json_obj['Temperature']['fanspeed']
         best_target_temp = calculate_best_temperature(
             high_temp=high, low_temp=low)
-        print(best_target_temp)
         set_ac_param("targetTemperature", best_target_temp, device_id)
         set_ac_param("fanLevel", fanspeed, device_id)
         set_ac_param("mode", "cool", device_id)
