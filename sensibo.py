@@ -6,19 +6,14 @@ from dotenv import load_dotenv
 from open_weather import get_hourly_weather_data
 import datetime
 import math
-from settings import MODE, is_debug_mode
+from settings import is_debug_mode
 from air_quality import calculate_air_quality
 
 load_dotenv()
 
-if MODE == "dev":
-    api_key = os.getenv("AC_API_KEY")
-    open_api_key = os.getenv("OPEN_AI_API_KEY")
-    weather_api = os.getenv("WEATHER_API")
-elif MODE == "prod":
-    api_key = os.environ.get('SENSIBO_API_KEY')
-    open_api_key = os.environ.get('OPEN_API_KEY')
-    weather_api = os.environ.get('WEATHER_API_KEY')
+api_key = os.environ.get('SENSIBO_API_KEY')
+open_api_key = os.environ.get('OPEN_API_KEY')
+weather_api = os.environ.get('WEATHER_API_KEY')
 
 openai.api_key = open_api_key
 
