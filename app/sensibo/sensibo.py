@@ -3,11 +3,11 @@ import json
 import openai
 import os
 from dotenv import load_dotenv
-from open_weather import get_hourly_weather_data
+from weather.open_weather import get_hourly_weather_data
 import datetime
 import math
 from settings import is_debug_mode
-from air_quality import calculate_air_quality
+from aqi.air_quality import calculate_air_quality
 
 load_dotenv()
 

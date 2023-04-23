@@ -1,9 +1,9 @@
-from sensibo import main, ac_details
-from cron_ac_params import dynamic_ac_ai
+from sensibo.sensibo import main,ac_details
+from crons.cron_ac_params import dynamic_ac_ai
 import json
 from flask import Flask, jsonify
-from cost_calculator import calculate_ac_bill
-from mail_bill_service import email_bill
+from bill.cost_calculator import calculate_ac_bill
+from bill.mail_bill_service import email_bill
 
 app = Flask(__name__)
 

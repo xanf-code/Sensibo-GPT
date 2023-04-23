@@ -1,4 +1,4 @@
-from sensibo import lowest_highest_ai, ac_details, set_ac_temp, test_gpt_op
+from sensibo.sensibo import lowest_highest_ai, ac_details, set_ac_temp, test_gpt_op
 from settings import is_debug_mode
 
 

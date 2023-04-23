@@ -16,4 +16,4 @@ COPY . .
 EXPOSE 8080
 
 # Set the entrypoint
-ENTRYPOINT ["python", "app.py"]
+ENTRYPOINT ["python", "/app/app.py"]
