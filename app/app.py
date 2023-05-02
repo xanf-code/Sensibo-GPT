@@ -4,16 +4,29 @@ import json
 from flask import Flask, jsonify
 from bill.cost_calculator import calculate_ac_bill
 from bill.mail_bill_service import email_bill
+from doors.door_status import check_door_status
+from utils.turn_off_ac import turn_off_ac
 
 app = Flask(__name__)
 
 
 @app.route('/ac', methods=['POST'])
 def ac_toggle():
-    main()
-    response = jsonify({'message': '[INFO] AC toggle run.'})
-    response.status_code = 200
-    return response
+    global_json = ac_details()
+    ac_status = global_json["sensibo_data"][0]["ac_state"]
+    device_uid = global_json["sensibo_data"][0]["device_uid"]
+    door_status = check_door_status()
+    if door_status == True:
+        if ac_status:
+            turn_off_ac(device_id=device_uid)
+            return jsonify({'message': '[INFO] Door open so switching off the AC.'})
+        else:
+            return jsonify({'message': '[INFO] Door Open.'}) 
+    elif door_status == False:
+        main()
+        response = jsonify({'message': '[INFO] AC toggle run.'})
+        response.status_code = 200
+        return response
 
 
 @app.route('/dynamic_ac', methods=['POST'])
