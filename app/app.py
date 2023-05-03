@@ -1,14 +1,23 @@
-from sensibo.sensibo import main,ac_details
-from crons.cron_ac_params import dynamic_ac_ai
+from threading import Thread
+import requests
 import json
+import time
+
 from flask import Flask, jsonify
+
+from sensibo.sensibo import main, ac_details
+from crons.cron_ac_params import dynamic_ac_ai
 from bill.cost_calculator import calculate_ac_bill
 from bill.mail_bill_service import email_bill
-from doors.door_status import check_door_status
+from doors.door_status import check_door_status,poll_for_updates
 from utils.turn_off_ac import turn_off_ac
 
 app = Flask(__name__)
 
+@app.before_first_request
+def start_polling():
+    poll_thread = Thread(target=poll_for_updates)
+    poll_thread.start()
 
 @app.route('/ac', methods=['POST'])
 def ac_toggle():
@@ -43,6 +52,7 @@ def dynamic_params():
         response.status_code = 200
         return response
 
+
 @app.route('/usage', methods=['GET'])
 def ac_usage():
     global_json = ac_details()
@@ -54,5 +64,8 @@ def ac_usage():
     response.status_code = 200
     return response
 
+
 if __name__ == '__main__':
+    poll_thread = Thread(target=poll_for_updates)
+    poll_thread.start()
     app.run(threaded=True, host='0.0.0.0',port=8080)
