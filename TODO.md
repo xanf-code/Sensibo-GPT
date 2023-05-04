@@ -1,1 +1,4 @@
-- [ ] Turn off AC upon inactivity.
+- [x] Turn off AC upon inactivity.
+- [x] Increase check timer. (Fetch Error Fix)
+- [x] Decrease door sensor timer.
+- [ ] use python AC wrapper classes.

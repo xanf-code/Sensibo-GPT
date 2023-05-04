@@ -34,22 +34,18 @@ test_gpt_op = {
 
 def ac_details():
     response = requests.get(url)
-
     if response.status_code == 200:
         data = response.json()
         room_data = [
             {
                 "room_name": result["room"]["name"],
-                "device_uid": result["smartMode"]["deviceUid"],
+                "device_uid": result["id"],
                 "ac_state": result["acState"]["on"],
                 "temperature": result["measurements"]["temperature"],
                 "humidity": result["measurements"]["humidity"],
                 "feelsLike": result["measurements"]["feelsLike"],
                 "tvoc": result["measurements"]["tvoc"],
                 "Co2": result["measurements"]["co2"],
-                "anti_mold_enabled":result["antiMoldConfig"]["enabled"],
-                "anti_mold_time":result["antiMoldConfig"]["fan_time"],
-                "anti_mold_running":result["antiMoldConfig"]["anti_mold_running"],
                 "acUsage": result["acUsage"]
             } for result in data["result"]]
         global_json = {"sensibo_data": room_data}

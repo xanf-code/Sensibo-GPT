@@ -16,7 +16,7 @@ def check_door_status():
 def poll_for_updates():
     while True:
         try:
-            response = requests.get(DOOR_STATUS_ENDPOINT, stream=True)
+            response = requests.get(DOOR_STATUS_ENDPOINT)
             for line in response.iter_lines():
                 if line:
                     door_status = json.loads(line.decode('utf-8'))['status']
@@ -24,8 +24,8 @@ def poll_for_updates():
                         global_json = ac_details()
                         ac_state = global_json["sensibo_data"][0]["ac_state"]
                         if ac_state:
-                            print("Door is open. Waiting for 5 min...")
-                            time.sleep(300)
+                            print("Door is open. Waiting for 3 min...")
+                            time.sleep(180)
                             response = requests.get(DOOR_STATUS_ENDPOINT)
                             door_status = json.loads(response.content.decode('utf-8'))['status']
                             if door_status == "open":
@@ -35,4 +35,4 @@ def poll_for_updates():
                                 print("Door was shut, AC state unchanged.")
         except:
             print("Error while polling for updates")
-        time.sleep(1)
+        time.sleep(10)
