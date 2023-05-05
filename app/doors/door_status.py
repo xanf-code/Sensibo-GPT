@@ -24,8 +24,8 @@ def poll_for_updates():
                         global_json = ac_details()
                         ac_state = global_json["sensibo_data"][0]["ac_state"]
                         if ac_state:
-                            print("Door is open. Waiting for 3 min...")
-                            time.sleep(180)
+                            print("Door is open. Waiting for 2 min...")
+                            time.sleep(120)
                             response = requests.get(DOOR_STATUS_ENDPOINT)
                             door_status = json.loads(response.content.decode('utf-8'))['status']
                             if door_status == "open":
