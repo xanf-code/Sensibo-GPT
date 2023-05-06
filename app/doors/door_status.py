@@ -52,7 +52,7 @@ def poll_for_updates():
                         if ac_state:
                             print("Door is open. Waiting for 2 min...")
                             time.sleep(120)
-                            response = requests.get(DOOR_STATUS_ENDPOINT)
+                            response = requests.get(DOOR_STATUS_ENDPOINT,headers=headers)
                             door_status = json.loads(response.content.decode('utf-8'))["data"]["thingList"][0]["itemData"]["params"]["lock"]
                             if door_status == 1:
                                 print("Door is still open. Turning off the AC.")
