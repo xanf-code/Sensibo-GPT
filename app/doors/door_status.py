@@ -12,7 +12,7 @@ family_id= os.environ.get('FAMILY_ID')
 bearer_token= os.environ.get('TOKEN')
 app_id= os.environ.get('APP_ID')
 
-DOOR_STATUS_ENDPOINT = f'https://as-apia.coolkit.cc/v2/device/thing?familyid={family_id}&num=0'
+DOOR_STATUS_ENDPOINT = f'https://as-apia.coolkit.cc/v2/device/thing?familyid={family_id}&num=1'
 
 headers = {
     'authority': 'as-apia.coolkit.cc',
